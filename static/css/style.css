@@ -1,0 +1,226 @@
+h1{
+	font-family: Arima-Bold;
+	font-size: 5.5em;
+}
+
+h2{
+	font-family: Arima-SemiBold;
+	font-size: 3em;
+}
+
+h3{
+	font-family: Arima;
+
+}
+
+body{
+	font-family: Arima;
+}
+
+a{
+	color:#e63946;
+}
+
+a:hover{
+	color: #d90429;
+}
+.tree img{
+	position: absolute; 
+	right:0px;
+       	opacity: 0.3;
+	z-index: -1;	
+}
+
+.tree{
+	min-height: 400px;
+}
+.cur_song{
+	position: fixed;
+	bottom: 2%;
+	background-color: rgba(12,21,48,0.9);
+	border: solid;
+	border-color: #edf2f4;
+	border-width: 2px 0px;
+}
+
+@media only screen and (max-width: 490px){
+	.navbar{
+		padding-top: 10%;
+		padding-bottom: 10%;
+		margin-top: 5%;
+	}
+
+	.main_text{
+		padding-top: 5%;
+		padding-bottom: 200px;
+	}
+	.santa{
+		right: 4%;
+	}
+	.tree{
+		padding-top: 7%;
+		padding-bottom: 150px;
+	}
+	.tree img{
+		position: absolute; 
+		right:10%;
+	       	width: 400px;
+		height: 400px;	
+}
+	h1{
+		font-family: Arima-Bold;
+		font-size: 3.5em;
+	}
+
+	h2{
+		font-family: Arima-SemiBold;
+		font-size: 2.5em;
+	}
+	h3{
+		padding-left: 30%;
+		padding-top: 10%;
+	}
+	.song_pic img{
+		width: 40px;
+		height: 50px; 
+	}
+}
+
+@media only screen and (min-width: 490px) and (max-width: 992px){
+	.main_text{
+		padding-top: 5%;
+		padding-bottom: 200px;
+	}
+	.santa{
+		right: 3%;
+	}
+	.tree{
+		padding-top: 3%;
+	}
+	.tree img{
+		margin-top: -25%;
+		position: absolute; 
+		right:25%;
+	       	width: 700px;	
+	}
+	h3{
+		padding-left: 40%;
+		padding-top: 10%;
+	}
+	.song_pic img{
+		width: 100%;
+		min-height: 100%; 
+	}
+
+}
+
+@media only screen and (min-width: 992px){
+	.navbar{
+		padding-top: 8px;
+		padding-bottom: 7px;
+	}
+	.main_text{
+		padding-top: 8%;
+		padding-bottom: 20%;
+	}
+	h3{
+		padding-top: 60%;
+		padding-left: 250px;
+	}
+	.tree{
+		min-height: 600px;
+	}
+	.santa{
+		right: 18%;
+	}
+	.song_pic img{
+		max-width: 70px;
+		min-height: 100%; 
+	}
+	.song_pic img{
+		width: 100%;
+		min-height: 100%; 
+	}
+}
+
+
+@font-face {
+    font-family: Arima;
+    src: url("../fonts/ArimaKoshi-Regular.otf") format("opentype");
+}
+
+@font-face {
+    font-family: Arima-Bold;
+    src: url("../fonts/ArimaKoshi-Bold.otf") format("opentype");
+}
+
+@font-face {
+    font-family: Arima-SemiBold;
+    src: url("../fonts/ArimaKoshi-SemiBold.otf") format("opentype");
+}
+
+
+
+.santa{
+	margin-top: 0px;
+	position: absolute;
+	height: 200px;
+	width: 200px;
+	background-image: url("../santa.png");
+	background-repeat: no-repeat;
+	background-color: #c1121f;
+	border-radius:50%;
+	background-size: 200px 100px;
+	background-position: center;
+	z-index: -1;
+	transform: rotate(-10deg);
+}
+.container-fluid{
+	min-height: 100%;
+}
+
+
+.navbar{
+	background-color: rgba(61,64,91,0.7);
+	border-style: solid;
+	border-color: white;
+	border-width: 2px 0 2px 0;
+}
+.navbar a{
+	color: white;
+}
+.navbar-dark .navbar-toggler-icon{
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 1)' stroke-width='3' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+
+}
+.navbar-toggler{
+	background-color: transparent;
+	border-width: 0;
+}
+.dropdown-menu{
+	background-color: #161f3c;
+	color: white;
+}
+
+
+.slider{
+	width: 90%;
+	accent-color: #F55050;
+}
+
+
+.border-duration{
+	height: 5px;
+	width: 100%;
+	border-bottom: 4px solid #F55050;
+}
+
+div[id^='name']:empty{
+	display:none;
+}
+div[id^='pswd']:empty{
+	display:none;
+}
+div[id^='pswd_agn']:empty{
+	display:none;
+}

@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block suggestions %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/suggestions.css') }}">
+<div class="alert alert-danger" {{ 'style=display:none' if errors|length == 0 else ''}} >
+	{% for error in errors %}
+		<p> {% autoescape off %} {{ error }} {% endautoescape %} </p>
+	{% endfor %}
+
+</div>
+<div class="alert alert-success" {{ 'style=display:none' if success|length == 0 else ''}} >
+	{% for succe in success %}
+		<p>{%autoescape off %} {{ succe }} {% endautoescape %} </p>
+	{% endfor %}
+</div>
+{% for sugg in suggestions %}
+	<div class="row pl-4 mb-3 mr-0 pt-2 usr_sugg">
+		<div class="col-9">
+			<div class="row">
+				<div class="col-12 pr-0 d-flex pb-2 ">
+					<img src="../static/santa_icon.jpg" width=30px height=30px>
+					<h5 class="pl-3 align-self-center" id="sugg_uname{{sugg['id']}}">{{ sugg['uname'] }} </h5>
+				</div>
+
+				<div class="col-12 pr-0 d-flex">
+					<div class=" users_sugg">
+						<h4 id="sugg_song_name{{sugg['id']}}" >{{ sugg['song_name'] }} </h4>
+						<p><span class="author" id="sugg_song_author{{sugg['id']}}">{{ sugg['song_author'] }} </span> </p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-3 d-flex justify-content-center">
+
+			<div class=" my-auto text-center ">	
+				<button class="btn ml-2 mb-2" type="button" >
+					<img class="del_sugg m-auto" id="{{sugg['id']}}" src='../static/del_sugg.png' width=35px height=35px onclick="del_sugg(this);" >
+				</button>
+			</div>
+		</div>
+	</div>
+
+{% endfor %}
+<script>
+	function del_sugg(btn){
+		var song_name = document.getElementById('sugg_song_name'+btn.id).innerHTML;
+		var song_author = document.getElementById("sugg_song_author"+btn.id).innerHTML;
+		var sugg_uname = document.getElementById("sugg_uname"+btn.id).innerHTML;
+		if (confirm(`You are about to delete a suggestion of song ${song_name} by ${song_author} added by ${sugg_uname}`) == true) {
+			window.location.href += `/delete_sugg/${btn.id}`;
+		}
+	}
+</script>
+
+{% endblock %}

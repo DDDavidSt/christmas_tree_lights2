@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="row pl-md-2  pr-md-2 mx-0"> 
+	
+	<div class="col-lg-6 main_text" >
+		<div class="row">
+			<div class="col-12">
+				<h1> Hey{{' '+session.get('name', '') if session['name'] is not none else ''}}!</h1><br>
+				<h2 id="until_chr">It's only --- days, --- hours, --- minutes and --- seconds until Christmas </h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="santa">
+				<p></p>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6 tree text-right">
+		<img src="../static/tree.png" width=800px height=600px>
+		<!-- if no-one is logged in -->
+		{% if session.get('id') == none %} 			<h3> Log in to control the lights, add suggestions or choose a song from the <a href='/playlist'>playlist</a> to play.</h3>
+			<button type="button" class="btn btn-lg btn-outline-light" onclick="document.getElementById('sign_in').style.display='block'" >Log in</button>
+		{% else %}
+			<h3> Now you can control which <a href='/playlist'>song</a> to play, like the songs in the playlist, add or like any of the <a href='/suggestions'>suggested songs</a> and much more! </h3>
+		{% endif %}			
+	</div>
+
+</div>
+
+<script src="/static/js/script.js"></script>
+{% endblock %}

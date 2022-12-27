@@ -1,0 +1,40 @@
+.container-fluid{
+	padding-bottom: 150px;
+}
+
+label{
+	color: #48cae4;
+}
+
+h4{
+	font-family: Arima-Bold;
+}
+
+form{
+		
+	border: 3px solid #457b9d;
+	border-top: -10px;
+	border-radius: 0.5em;
+	background: rgba(168, 218, 220, 0.1);
+}
+@media only screen and (min-width: 992px){
+	form {
+		width: 50%;
+	}
+}
+
+.like_butt button:focus{
+	outline: none;
+	box-shadow: none;
+}
+
+.users_sugg{
+	padding-left: 60px;
+}
+.author{
+	color: grey;
+}
+
+.usr_sugg{
+	background-color: rgba(29, 53, 87, 0.5);
+}

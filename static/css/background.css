@@ -1,0 +1,13 @@
+html, body{
+	width: 100%;
+	min-height: 100%;
+	background-color: #161f3c;
+	color: white;
+	overflow-x: hidden;
+}
+#snow {
+  position:absolute;
+  width:100%;
+  min-height:100%;
+  z-index: 0;
+}

@@ -1,0 +1,102 @@
+.list .row, .card{
+	background-color: rgba(20, 33, 61, 0.7) ;
+}
+
+.playlist{
+	height: 120%;
+}
+.container-fluid{
+	padding-bottom: 100px;
+}
+.card {
+	margin: 10px;
+	border: none;
+}
+.card button, .card button:hover{
+	font-family: Arima-Bold;
+	color: white;
+	background: none;
+	border: none;
+	
+}
+.card img + button{
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 50%;
+}
+.card button:focus{
+	outline: none;
+	box-shadow: none;
+}
+
+.card-header button img{
+	width: 40px;
+	height: 40px;
+}
+
+.card-header img{
+	width: 50px;
+	height: 50px;
+}
+.author{
+	font-size: 0.7em;
+	color: grey;
+	padding-top: 0;
+}
+
+.heart{
+	width: 27px !important;
+	height: 25px !important;
+	display: flex;
+	float: right;
+}
+
+p + img {
+	width: 200px;
+	height: 200px;
+}
+
+.exp-img{
+	width: 180px;
+	max-height: 180px;
+}
+.border-duration-inactive{
+	height: 5px;
+	width: 100%;
+	border-bottom: 4px solid grey;
+}
+
+.border-duration{
+	width: 100%;
+}
+
+.active{
+	color: #457b9d !important;
+}
+
+.author-active{
+	color: #457b9d;
+}
+
+.play{
+	width: 60px;
+	height: 60px;
+}
+
+.song_info{
+	padding-top: 190px;
+}
+
+.image-upload>input{
+	display:none;
+}
+.image-upload img:hover{
+	opacity: 0.7;
+}
+
+.error{
+	color: red;
+	background-color: rgba(242, 132, 130, 0.4);
+	font-size: 1em;
+}
