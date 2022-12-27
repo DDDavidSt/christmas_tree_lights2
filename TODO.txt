@@ -1,5 +1,4 @@
 somewhat old version
 -Adding a suggestion - only checks if a new suggestion is already suggested but does not check if that song is already in a playlist.
--Instead of deleting files when a song deletion occurs - just move the files to another folder
 -check all cur.execute() whether they are properly handled with try-except
-
+-with each get_song call also update the time panel when the song is expanded (if a song changes and the page is not refreshed than it stays on the song where refreshed last)

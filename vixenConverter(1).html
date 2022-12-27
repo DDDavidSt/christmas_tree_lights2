@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+
+<body>	
+<p>
+The vixen file (.vix) must have 9 total channels (No more, no less). The first 8 are the channels, the 9th will be ignored.  
+</p>
+	<input type="file" id="files" onchange="readFile();" name="files[]" multiple />
+<output id="list"></output>
+<hr>
+<h3>Output</h3>
+	<textarea id="output" rows="25" cols="25"></textarea>
+	
+</body>
+
+<script>
+var parseXml;
+
+if (typeof window.DOMParser != "undefined") {
+    parseXml = function(xmlStr) {
+        return ( new window.DOMParser() ).parseFromString(xmlStr, "text/xml");
+    };
+} else if (typeof window.ActiveXObject != "undefined" &&
+       new window.ActiveXObject("Microsoft.XMLDOM")) {
+    parseXml = function(xmlStr) {
+        var xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async = "false";
+        xmlDoc.loadXML(xmlStr);
+        return xmlDoc;
+    };
+} else {
+    throw new Error("No XML parser found");
+}
+
+
+
+
+	var sourceFile = "";
+	function readFile(){
+		var file = document.getElementById("files").files[0];
+
+		var reader = new FileReader();
+		reader.onload = function(progressEvent){
+			// Entire file
+			sourceFile = this.result;
+			processXML();
+		};
+		reader.readAsText(file);
+	};
+
+	function processXML(){
+		var xml = parseXml(sourceFile);
+		
+		console.log(xml.documentElement.Profile);
+		var events64 = xml.documentElement.childNodes[21].innerHTML;
+		var eventsMS = xml.documentElement.childNodes[3].innerHTML - 0;
+		result = convert(events64, 8, 9, eventsMS);
+		document.getElementById("output").value = result;
+	}
+</script>
+
+
+<script>
+
+
+
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+	var args = arguments;
+	return this.replace(/{(\d+)}/g, function(match, number) { 
+	  return typeof args[number] != 'undefined'
+		? args[number]
+		: match
+	  ;
+	});
+  };
+}
+
+function getEventString(time, channel, value){
+	time = "000000" + time;
+	time = time.substr(time.length - 6);
+	return " {0} ,{1}      ,{2}\n".format(time, channel, value);
+}
+
+function convert(sequence_base64, channelCount, totalChannels, eventDurationMS){
+	byteArrays = b64toArray(sequence_base64, totalChannels);
+	var numberOfEvents = byteArrays[0].length;
+	
+	var previousState = [];
+
+	for(var i = 0; i < channelCount; i++) {
+		previousState.push(0);
+	}
+	
+	var output = "TIME(MS),COMMAND,VALUE\n";
+	
+	for (var event = 0; event < numberOfEvents; event++){
+		var currentMS;
+		for(var channel = 0; channel < channelCount; channel++){ //for each channel in each event
+			var currentState = byteArrays[channel][event];
+			if(currentState > 0){
+				//vixen allows partial values, convert to on or off.
+				currentState = 1;
+			}
+			if(currentState != previousState[channel]){
+				//The value is different from the previous cell.
+				output = output + getEventString(event * eventDurationMS, channel + 1, currentState);
+				previousState[channel] = currentState;
+			}			
+		}		
+	}
+	
+	//turn off all channels
+	for(var channel = 0; channel < channelCount; channel++){
+		output = output + getEventString((event + 1) * eventDurationMS, channel + 1, 0);
+	}
+	return output;
+	//get array
+	//for each event
+		//encode each channel if there is a change from the last setting
+	
+}
+
+function b64toArray(b64Data, totalChannels) {
+    var contentType = '';
+	totalChannels = totalChannels || 9;
+	
+	
+
+    var byteCharacters = atob(b64Data);
+    var sliceSize = byteCharacters.length / totalChannels;
+	
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        var byteNumbers = new Array(slice.length);
+        for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        var byteArray = new Uint8Array(byteNumbers);
+
+        byteArrays.push(byteArray);
+    }
+	return byteArrays;
+}
+
+
+
+</script>
+</html>
