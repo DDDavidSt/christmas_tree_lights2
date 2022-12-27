@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+		<meta charset="utf-8" />
+		<meta http-equiv="Cache-Control" content="no-transform" />
+		<meta name="applicable-device" content="mobile" />
+		<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="msapplication-tap-highlight" content="no" />
+		<meta name="format-detection" content="telephone=no">
+		<meta name="description" content="snow-js">
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">	
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}" >
+	 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}" >
+		<title> Christmas tree lights </title>
+	
+	</head>
+	<body>
+
+		<div class="container-fluid px-0" id="snow">
+			<nav class="navbar navbar-expand-md navbar-dark mt-md-4 pt-md-3 pb-md-3 no-gutters">
+				<a class="navbar-brand" href="#">
+				    <img src="/static/ic_tre.png" width="30" height="30" class="d-inline-block align-top" alt="">Christmas Tree Lights</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav ml-auto">
+						<li id="home" class="nav-item active">
+							<a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+						</li>
+						<li id="playlist" class="nav-item">
+							<a class="nav-link" href="/playlist">Playlist</a>
+						 </li>
+
+						{% if session.get('id', None) is none %}
+							<li id="user" class="nav-item">
+								<a class="nav-link" href="#"  onclick="document.getElementById('sign_in').style.display='block'">Login/Sign Up</a>
+						{% else %}
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle" href="" id="navbarDropdownMenuLink1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >{{session.get('name', None)}}</a>
+								<div class="dropdown-menu" aria-haspopup="true" aria-expanded="false">
+									<a class="dropdown-item" href="/account">My account</a>
+									<a class="dropdown-item" href="/logout">Log out</a>
+								</div>
+							{% endif %}
+						</li>
+						<li id="suggestions" class="nav-item">
+							<a class="nav-link" href="/suggestions">Suggestions</a>
+						</li>
+						<li id="admin" class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle {{ '' if session['admin'] == 1 else 'disabled'}}" href="" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >Admin</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+							<a class="dropdown-item" href="/adm_pl">Playlist</a>
+							<a class="dropdown-item" href="/adm_usrs">Users</a>
+							<a class="dropdown-item" href="/adm_sugg">Recommendations</a>
+
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<!-- to make the current nav element active when clicked on -->
+			<script>
+						var pathname = window.location.pathname,
+						pages = ['home','playlist','user', 'suggestions','admin'];
+						$('.nav-item').each(function(i) {
+
+							if (pathname.includes(pages[i])) $(this).addClass('active')
+							else if ($(this)[0].className.includes('active')) $(this).removeClass('active');
+						});
+			</script>
+
+			{% block main %} {% endblock %}
+			{% block playlist %} {% endblock %}
+			{% block suggestions %} {% endblock %}
+			{% block admin_playlist %} {% endblock %}
+			{% block my_account %} {% endblock %}
+			{% block admin_users %} {% endblock %}
+			<div class="row cur_song fixed-bottom no-gutters">
+				<div class="col-2 text-center pt-2">
+					<label for="disabledRange" class="form-label"><span class="text-center" style="width: 70%; color: grey">Volume</span></label>
+					<input type="range" min="50" max="100" value="50" class="form-range slider" id="volume" onchange="change_vol(this.value)" {{'disabled' if session['id'] == none else ''}}>
+				</div>
+				<div class="col-8 my-auto text-center pb-2 pt-2">
+					<div class="row">
+						<div class="col-2 pr-1 d-flex align-items-center justify-content-center"> 
+							<button class="btn btn-default" onclick="window.location.href='/prev'" {{'disabled' if session['id'] == none else ''}}>
+								<img src="{{ url_for('static', filename='next.png') }}" style="transform: rotate(180deg);" width=30px height=30pxi class="mx-auto float-right">
+							</button>
+						</div>
+						<div class="col-8 pr-1 pl-1">
+							<div class="row">
+								<div class="col-12">
+									<p style="padding: 0; margin:0; font-size: 1em; color: grey"> Now playing </p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<marquee id="currsong_name_bar" behavior="scroll" direction="left" scrollamount=4 style="padding: 0; margin:0"> {{ currsong['song_name'] ~ ' - ' ~ currsong['song_author'] }} </marquee>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12 ">
+									<div  id="song_duration" class="border-duration">
+									</div>
+						
+								</div>
+							</div>
+						</div>
+						<div class="col-2 pl-1 d-flex align-items-center justify-content-center" >
+							<button class="btn btn-default" onclick="window.location.href='/next'" {{'disabled' if session['id'] == none else ''}}>
+								<img src="{{ url_for('static', filename='next.png') }}" width=30px height=30px >				</button>
+						</div>
+					</div>
+				</div>	
+				<div class="col-2 pl-md-5 pb-2 pt-3 pt-sm-2 pr-1 song_pic">
+					<img id='currsong_img_bar' src="{{ url_for('static', filename=currsong['song_img_path'])}}" class="mx-auto float-right">
+				</div>
+			</div>
+
+			<script src="{{ url_for('static', filename='js/update_values.js')}}"></script>	
+
+		</div>
+		<div id="sign_up" class="modal" style="{{'display: block;' if signup_errors|length != 0 else '' }}">
+			<form class="modal-content animate" action="/signup" method="post">
+			  <div class="sele">
+			    <div class="imgcontainer">
+			      <span onclick="document.getElementById('sign_up').style.display='none'" class="close" title="Close Modal">&times;</span>
+			      <img src="{{ url_for('static', filename='santa_icon.jpg')}}" alt="Avatar" class="avatar">
+			    </div>
+				<div id="signup_errors" class="alert alert-danger" style="{{'display: block;' if signup_errors|length != 0 else 'display: none' }}">
+					{% for sgp_error in signup_errors %}
+						{{ sgp_error }}<br>
+					{% endfor %}	
+				</div>
+
+			    <div class="container">
+			      <label for="uname"><b>Username</b></label>
+			      <input type="text" placeholder="Enter Username" name="uname" required onkeyup="check_uname(this)">
+				<div class="alert alert-danger" id="name_error"></div>
+			      <div class="alert alert-success" id="name_succ"></div>
+			      <label for="pswd"><b>Password</b></label>
+			      <input type="password" placeholder="Enter Password" name="pswd" id="pswd" required onkeyup="check_pswd(this)">
+			      <div class="alert alert-danger" id="pswd_error"></div>
+			      <div class="alert alert-success" id="pswd_succ"></div>
+			      <label for="pswd_agn"><b>Password Again</b></label>
+			      <input type="password" placeholder="Enter Password Again" name="pswd_agn" required onkeyup="check_pswd_agn(this)">
+				<div class="alert alert-danger" id="pswd_agn_error"></div>
+				<div class="alert alert-success" id="pswd_agn_succ"></div>
+			      <button type="submit" id="sgn_up_btn">Sign Up</button>
+			      <label>
+				<input type="checkbox" checked="checked" name="remember"> Remember me
+			      </label>
+			    </div>
+
+			    <div class="container" >
+				    <p><b> Already a member?</b> </p>
+			    		 <button type="button" onclick="document.getElementById('sign_up').style.display='none'; document.getElementById('sign_in').style.display='block'; " style="background-color: #d90429;" class="signupbtn">Log in</button>
+
+		             		 <button type="button" onclick="document.getElementById('sign_up').style.display='none'" class="cancelbtn">Cancel</button>
+
+			    </div>
+		    </div>
+		  </form>
+		</div>
+
+		<div id="sign_in" class="modal" style="{{'display: block;' if login_errors|length != 0 else '' }}">
+  
+		  <form class="modal-content animate" action="/login" method="post">
+			  <div class="sele">
+			    <div class="imgcontainer">
+			      <span onclick="document.getElementById('sign_in').style.display='none'" class="close" title="Close Modal">&times;</span>
+			      <img src="{{ url_for('static', filename='santa_icon.jpg')}}" alt="Avatar" class="avatar">
+			    </div>
+			    <div id="login_errors" class="alert alert-danger" style="{{ 'display: none;' if login_errors|length == 0 else ''}}">
+				    {% for error in login_errors %}
+					    {{error}}
+				    {% endfor %}
+			    </div>
+
+			    <div class="container">
+			      <label for="uname"><b>Username</b></label>
+			      <input type="text" placeholder="Enter Username" name="uname" required>
+
+			      <label for="pswd"><b>Password</b></label>
+			      <input type="password" placeholder="Enter Password" name="pswd" required>
+				
+			      <button type="submit">Login</button>
+			      <label>
+				<input type="checkbox" checked="checked" name="remember"> Remember me
+			      </label>
+			    </div>
+
+			    <div class="container" >
+				    <p><b> Not a member?</b> </p>
+			     <button type="button" onclick="document.getElementById('sign_in').style.display='none'; document.getElementById('sign_up').style.display='block'; " style="background-color: #d90429;" class="signupbtn">Sign up</button>
+
+		             <button type="button" onclick="document.getElementById('sign_in').style.display='none'" class="cancelbtn">Cancel</button>
+			      
+							    </div>
+			    </div>
+			  </form>
+		</div>
+
+		<script>
+			// Get the modal
+			var sign_in = document.getElementById('sign_in');
+			var sign_up = document.getElementById('sign_up');
+			// When the user clicks anywhere outside of the modal, close it
+			window.onclick = function(event) {
+				if (event.target == sign_in) {
+					sign_in.style.display = "none";
+				}else if(event.target == sign_up){
+					sign_up.style.display = "none";
+				}
+			}
+		</script>
+		<script src="/static/js/check_signup.js"></script>
+	</body>
+	<script src="/static/js/snow.js"></script>
+	<script>
+                new Snow('#snow',{
+                    number:100,
+                    r: 2.5,
+                    v: 1.5
+                });
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+</html>

@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block main %} {% endblock %}
+
+
+{% block playlist %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/playlist.css') }}" >
+
+<div id="accordion" class="playlist">
+	{% for song_id, song in songs.items() %}
+		<div class="card">
+			<div class="card-header pl-1 pr-1" id="heading{{song_id}}">
+				<div class="row">
+					<div class="col-12">
+						<img src="static/{{song['song_img_path'] }}" width=5% height=5%>
+
+						<button id="{{song_id}}" onclick="window.location='/playsong/{{song_id}}'" class="btn text-left pr-0 {{ 'active' if song_id == currsong_index else ' ' }} " type="button" >
+							{{ song['song_name'] }}<br><span class="{{ 'author-active' if song_id == currsong_index else 'author'}} "> {{ song['song_author'] }} </span>
+						</button>
+						<div class="float-right d-flex align-self-center">	
+							<div class="text-center">
+								<button class="btn pr-3 my-auto" type="button" {{'disabled' if session.get('id') == none else ''}}>
+									<img class="heart" id='heart{{song_id}}' name="{{song_id}}" src='{{'../static/heart_full.png' if song['liked'] == 1 else '../static/heart.png'}}' width=30px height=30px {{'onclick=swap_song(this);' if session.get('id') != none else 'onclick=log_in_err();' }}  >
+								</button>
+								<p class="m-0" id="num_likes{{song_id}}"> {{song['likes']}} </p>
+							</div>
+							<button class="btn pr-1 pl-0 collapsed text-right float-right" type="button" data-toggle="collapse" data-target="#collapse{{song_id}}" aria-expanded="false" aria-controls="collapse{{song_id}}">
+								<img src='https://mdbootstrap.com/img/svg/hamburger2.svg?color=fff'>
+							</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+			<div id="collapse{{song_id}}" class="collapse" aria-labelledby="heading{{song_id}}" data-parent="#accordion">
+				<div class="card-body pb-0">
+					<div class="row">
+						<div class="col-12 ">
+							<img class="exp-img mx-auto d-block" src="static/{{ song['song_img_path'] }}">
+						</div>
+					</div>
+					<div class="row pt-3">
+						<div class="col-12 text-center">
+							<p style="font-size: 1.5em; margin-bottom: 0">{{ song['song_name'] }}<br><span class="author"> {{ song['song_author'] }} </span></p>
+ 
+						</div>
+
+					</div>
+					<div class="row">
+						<div class="col-2 p-0 text-right">
+							
+							<p class="my-auto" {{ 'id=curr_time_song' if song_id == currsong_index else ' ' }}> 00:00 </p>
+						</div>
+						<div class="col-8 my-auto">
+							<div class="{{ 'border-duration' if song_id == currsong_index else 'border-duration-inactive' }} my-auto" {{ 'id=active_song_duration' if song_id == currsong_index else ' '}}>
+							</div>
+						</div>
+						<div class="col-2 p-0 text-left">
+
+							<p class="my-auto"> {{song['song_duration_mins']}} </p>
+						
+						</div>	
+						<div class="col-12 text-center">
+
+							<a href=/playsong/{{song_id}} class="btn py-0 m-auto" type="button" {{'disabled' if session.get('id') == none else ''}}>
+								<img class="play" src='../static/play.png' >
+							</a>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+</div>
+<script src="../static/js/like_song_sugg.js"></script>
+{% endblock %}
+

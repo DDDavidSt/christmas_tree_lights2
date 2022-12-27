@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block admin_users %}
+
+{% for usr in usrs %}
+	<div class="row pl-3 mb-3 mr-0 pt-2" style="{{'background-color:rgb(69,123,157,0.5)' if usr['id'] == session['id'] else ''}}">
+		<div class="col-9">
+			<div class="row">
+				<div class="col-12 pr-0 pb-2 d-flex align-self-center">
+					<img class="my-auto" src="../static/santa_icon.jpg" width=60px height=60px>
+					<div class="m-3">
+						<h2 id="name{{usr['id']}}">{{ usr['uname'] }} </h2>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-3 d-flex justify-content-center">
+            {% if usr['id'] == session['id'] %}
+                <div class="my-auto text-center">	
+                    <button id="{{usr['id']}}" class="btn btn-light ml-2 mb-2" type="button"  title="You cannot undo your own admin rights" disabled >Undo admin</button>
+                </div>
+            {% elif usr['admin'] == 1 %}
+                <div class="my-auto text-center ">	
+                    <button id="{{usr['id']}}" class="btn btn-light ml-2 mb-2" type="button" onclick="undo_admin(this);">Undo admin</button>
+                </div>
+            {% else %}
+                <div class="my-auto text-center ">	
+                    <button id="{{usr['id']}}" class="btn btn-light ml-2 mb-2" type="button" onclick="make_admin(this);">Make admin</button>
+                </div>
+            {% endif %}
+
+		</div>
+	</div>
+
+{% endfor %}
+<script>
+    function undo_admin(btn){
+        uname = document.getElementById("name"+btn.id).innerHTML;
+
+        $.ajax({
+            url: '/undo_adm',
+            data: {'id':btn.id},
+            type: 'POST',
+                dataType: 'json',
+            success: function(response){
+                alert("Succesuflly deleted "+uname+"'s admin rights");
+                btn.innerHTML = 'Make admin';
+                btn.onclick = function(){make_admin(this);};
+            },
+            error: function(error){
+                alert("Error deleting "+uname+"'s admin rights - most likely an unauthorized event");
+            }
+        });
+        
+
+    }
+    function make_admin(btn){
+        uname = document.getElementById("name"+btn.id).innerHTML;
+        $.ajax({
+            url: '/make_adm',
+            data: {'id':btn.id},
+            type: 'POST',
+                dataType: 'json',
+            success: function(response){
+                alert("Succesuflly changed "+uname+"'s admin rights");
+                btn.innerHTML = 'Undo admin';
+                btn.onclick = function(){undo_admin(this);};
+            },
+            error: function(error){
+                alert("Error changing "+uname+"'s admin rights - most likely an unauthorized event");
+            }
+        });
+        
+
+    }
+</script>
+{% endblock %}

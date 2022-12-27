@@ -1,0 +1,24 @@
+
+.container-fluid{
+	padding-bottom: 150px;
+}
+
+div[id^='edit']:empty{
+	display:none;
+	
+}
+
+.ed_psw{
+	margin: 0.2em 1em 0.2em 2em;
+	font-size: 1em;
+}
+@media only screen and (max-width: 496px){
+	.ed_psw{
+		margin: 0 1em;
+	}
+}
+
+div[id^='edit_name']{
+	font-size: 0.4em;
+}
+

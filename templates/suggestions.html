@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block main %} {% endblock %}
+{% block playlist %} {% endblock %}
+
+{% block suggestions %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/suggestions.css') }}">
+<div class="alert alert-danger" {{ 'style=display:none' if errors|length == 0 else ''}} >
+	{% for error in errors %}
+		<p> {% autoescape off %} {{ error }} {% endautoescape %} </p>
+	{% endfor %}
+
+</div>
+<div class="alert alert-success" {{ 'style=display:none' if success|length == 0 else ''}} >
+	{% for succe in success %}
+	<p>{%autoescape off %} {{ succe }} {% endautoescape %} </p>
+	{% endfor %}
+
+</div>
+<form method="POST" class="m-3 p-4" action="/add_sugg" enctype="multipart/form-data">
+	<div class="form-group">
+		<div class="d-flex">
+			
+			<img src="../static/santa_icon.jpg" width=100px height=100px>
+			<div class="align-self-center pl-3">
+				<label for="usr_name">User name</label>
+				<h4 > {{session.get('name')}}</h4>
+			</div>
+		</div>
+		<div class="form-group pt-3">
+			<label for="sugg_name">Name of the song</label>
+			<input class="form-control" name="sugg_name" id="sugg_name" placeholder="Never gonna give you up" rows="3"></input>
+		</div>
+		<div class="form-group">
+			<label for="sugg_author">Author</label>
+			<input class="form-control" name="sugg_author" id="sugg_author" placeholder="Rick Astley" rows="3"></input>
+		</div>
+
+	</div>
+	<button type="submit" class="btn btn-lg btn-outline-light">Add your song suggestion</button>
+</form>
+<h4 class="pl-3 pb-3 pr-3"> Or vote for some of the already suggested songs by other users </h4>
+{% for sugg in usr_suggestions %}
+	<div class="row pl-3 mb-3 mr-0 pt-2 usr_sugg">
+		<div class="col-9">
+			<div class="row">
+				<div class="col-12 pr-0 d-flex pb-2 ">
+					<img src="../static/santa_icon.jpg" width=30px height=30px>
+					<h5 class="pl-3 align-self-center">{{ sugg['uname'] }} </h5>
+				</div>
+
+				<div class="col-12 pr-0 d-flex">
+					<div class=" users_sugg">
+						<h4 >{{ sugg['song_name'] }} </h4>
+						<p><span class="author">{{ sugg['song_author'] }} </span> </p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-3 d-flex justify-content-center">
+
+			<div class=" like_butt my-auto text-center ">	
+				<button class="btn ml-2 mb-2" type="button" {{'disabled' if session.get('id') == none else ''}}>
+					<img class="heart m-auto" id='heart{{sugg['id']}}' name="{{sugg['id']}}" src='{{'../static/heart_full.png' if sugg['liked'] == 1 else '../static/heart.png'}}' width=35px height=30px {{'onclick=swap_sugg(this);' if session.get('id') != none else 'onclick=log_in_err();' }} >
+				</button>
+					<p id="num_likes{{sugg['id']}}"> {{sugg['likes']}} </p>
+			</div>
+		</div>
+	</div>
+
+{% endfor %}
+
+<script src="../static/js/like_song_sugg.js"></script>
+
+
+{% endblock %}
+

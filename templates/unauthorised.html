@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="text-center pt-4 px-4" style="padding-bottom: 100px">
+    <img src="{{url_for('static', filename='unauth.png') }}" width="300px" height="300px">
+    <h2> Santa's adding you to his naughty list</h2>
+    <h4> You have no permission to visit this site.<br> Please, log in or contact the admin</h4>
+</div>
+{% endblock %}
+
