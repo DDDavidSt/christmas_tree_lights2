@@ -19,4 +19,4 @@ After installing all the libraries just `cd christmas_tree_lights2.0` and run `p
 
 ## TODO
 - playlist page doesn't automatically refresh the time line with current time when the song expands (it stays on the song on which it was most recently refreshed)
--the code in application.py needs a lot of improvements since I was a bit in a hurry to make it work before Christmas and didnt have time to do it properly (esp. `get_songs()` can be often used much more efficiently - sometimes is used only to determine one song or number of songs).
+- the code in application.py needs a lot of improvements since I was a bit in a hurry to make it work before Christmas and didnt have time to do it properly (esp. `get_songs()` can be often used much more efficiently - sometimes is used only to determine one song or number of songs).
