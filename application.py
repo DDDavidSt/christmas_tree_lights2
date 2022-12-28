@@ -52,7 +52,7 @@ Session(app)
 @app.route('/playsong/<id>')
 def playsong(id):
     global d
-    if id in d['songs'].keys():
+    if int(id) in d['songs'].keys():
         d['currsec'] = 0
         d['currsong'] = int(id)
 
@@ -191,6 +191,7 @@ def edit():
             conn.commit()
             if succ_mess != '':
                 success.append(succ_mess+'was edited')
+        
         return redirect("adm_pl")
     else:
         songs=get_songs()
@@ -218,8 +219,11 @@ def add_new():
 
             #find the last id from songs table - the ne file is gonna have id + 1
             cur.execute("SELECT seq FROM sqlite_sequence WHERE name='songs';")
-            next_id = str(list(cur.fetchone())[0] + 1)
-
+            next_id = '1'
+            try:
+                next_id = str(list(cur.fetchone())[0] + 1)
+            except:
+                pass
             if 'song_name_new' in request.form:
                 name = check_name(request.form["song_name_new"])
                 if len(name) != 0:
@@ -333,6 +337,7 @@ def add_new():
                 sdict[i[0]] = i
             d['songs'] = sdict
 
+
         return redirect("adm_pl")
     else:
         songs=get_songs()
@@ -346,11 +351,8 @@ def volume():
 
 @app.route('/set_vol', methods=['POST', 'GET'])
 def set_volume():
-    print("choooja")
     if session.get('id') is not None:
-        print("HOOOOOJAA")
         if request.method == "POST":
-            print("HEEEEJA")
             m = alsaaudio.Mixer("Headphone")
             m.setvolume(int(request.values.get("vol")))   
         return redirect(url_for("home"))
@@ -515,15 +517,26 @@ def adm_usrs():
             col_names = [tup[0] for tup in res.description]
             row_val = [i for i in row]
             usrs.append(dict(zip(col_names,row_val)))
-        return render_template("adm_users.html", songs=songs, currsong=songs[d['songs'][d['currsong']][0]], usrs=usrs)
+        if len(songs) > 0:
+            return render_template("adm_users.html", songs=songs, currsong=songs[d['songs'][d['currsong']][0]], usrs=usrs)
+        if songs == {}:
+            return render_template("adm_users.html", songs=songs, currsong="Empty song list", usrs=usrs)
+
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
+    errors.append("Failed to connect to the database")
+    return redirect("error")
 
 @app.route('/adm_pl/delete/<id>', methods=["POST"])
 def del_song(id):
     global success, errors
-    if session.get('admin') == 1 and d['currsong'] != id:
+    print(id, d['currsong'])
+    if( str(d['currsong']) == id and len(d['songs']) > 1):
+        errors.append("Cannot delete a song that is being played")
+        return redirect(url_for('admin_playlist')) 
+
+    if session.get('admin') == 1:
         cur_ret = opendb(DATABASE_PATH)
 
         if cur_ret is None:
@@ -570,12 +583,15 @@ def favicon():
 
 @app.route('/playlist')
 def playlist():
+    global errors
     songs = get_songs()
-    if songs:
+    if len(songs) > 0 :
+        if(d['currsong'] not in d['songs'].keys() and len(d['songs']) < 2):
+            d['currsong'] = min(d['songs'].keys())
         return render_template("playlist.html", songs=songs,  currsong_index=d['currsong'], currsong=d['songs'][d['currsong']])
-    else:
-        errors.append("Failed to connect to the database")
-        return redirect("error")
+    if songs == {}:
+        return render_template("playlist.html", songs={0:{"song_name":"Empty song list", "song_author":"nothing to play"}},  currsong_index=0, currsong=())
+    return redirect("error")
 
 @app.route('/adm_pl', methods=["GET", "POST"])
 def admin_playlist():
@@ -593,16 +609,22 @@ def admin_playlist():
         success = []
         songs = get_songs()
         if len(songs) != 0:
+            print(d)
+            if(d['currsong'] not in d['songs'].keys() and len(d['songs']) < 2):
+                d['currsong'] = min(d['songs'].keys())
             return render_template("adm_playlist.html", songs=songs, currsong_index=d['currsong'], currsong=d['songs'][d['currsong']], errors=nowerrors, success=nowsuccess, form_val=nowvalues)
-        else:
+        if songs == {}:
             errors.append("Empty song list")
             return render_template("adm_playlist.html", songs={}, curssong_index =0,errors=nowerrors,currsong="empty", success=nowsuccess, form_val=nowvalues )
     else:
         songs=get_songs()
-        if songs:
+        if len(songs) > 0:
             return render_template("unauthorised.html",  currsong_index=d['currsong'], currsong=d['songs'][d['currsong']], songs=songs)
-        errors.append("Empty song list")
-        return redirect("error")
+        if songs == {}:
+            errors.append("Empty song list")
+            return render_template("adm_playlist.html", songs={}, curssong_index =0,errors=nowerrors,currsong="empty", success=nowsuccess, form_val=nowvalues )
+    errors.append("Empty song list")
+    return redirect("error")
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     global login_errors
@@ -640,18 +662,22 @@ def my_account():
         nowerrors, nowsuccess = errors.copy(), success.copy()
         errors, success = [], []
         songs = get_songs()
-        if songs:
+        if len(songs) > 0:
             suggestions = get_suggestions(session.get('id', -1))
-            print('My account suggestions for user with id', session.get('id', -1),':',suggestions)
             return render_template('account.html', currsong_index=d['currsong'], currsong=d['songs'][d['currsong']], errors=nowerrors, success=nowsuccess, suggestions=suggestions)
-        errors.append("Empty song list")
-        return redirect("error")
+        if songs == {}:
+            suggestions = get_suggestions(session.get('id', -1))
+            return render_template('account.html', currsong_index=0, currsong="Empty song list", errors=nowerrors, success=nowsuccess, suggestions=suggestions)
+        
     else:
         songs=get_songs()
-        if songs:
+        if len(songs) > 0:
             return render_template("unauthorised.html", currson_index=d['currsong'], currsong=d['songs'][d['currsong']], songs=songs)
-        errors.append("Empty song list")
-        return redirect("error")
+        if songs == {}:
+            return render_template("unauthorised.html", currson_index=0, currsong="Empty song list", songs=songs)
+
+    errors.append("Empty song list")
+    return redirect("error")
         
 @app.route("/account/delete_sugg/<id>")
 def delete_sugg(id):
@@ -824,7 +850,8 @@ def index():
     login_errors = []
     if d['songs']:
         return render_template("index.html", currsong=d['songs'][d['currsong']], login_errors=now_login_errors, signup_errors=now_sgp_errors)
-    errors.append("Failed to connect to the database")
+    else:
+        return render_template("index.html", currsong=0, login_errors=now_login_errors, signup_errors=now_sgp_errors)
     return redirect("error")
 
 @app.route("/next")
@@ -862,11 +889,14 @@ def suggestions():
     nowerrors = errors.copy()
     nowsuccess = success.copy()
     errors, success = [], []
+
     songs = get_songs()
-    if songs:
+    if len(songs) > 0:
         suggestions = get_suggestions()
         return render_template("suggestions.html", currsong=d['songs'][d['currsong']], usr_suggestions=suggestions, errors=nowerrors, success=nowsuccess)
-    
+    if songs == {}:
+        suggestions = get_suggestions()
+        return render_template("suggestions.html", currsong="Empty song list", usr_suggestions=suggestions, errors=nowerrors, success=nowsuccess)
     errors.append("Failed to connect to the database")
     return redirect("error")
 
@@ -879,15 +909,22 @@ def adm_suggestions():
         nowsuccess = success.copy()
         errors, success = [], []
         songs = get_songs()
-        if songs:
+        if len(songs) > 0:
             suggestions = get_suggestions()
             return render_template("adm_suggestions.html", currsong=songs[d['songs'][d['currsong']][0]], suggestions=suggestions, errors=nowerrors, success=nowsuccess)
+        if songs == {}:
+            suggestions = get_suggestions()
+            return render_template("adm_suggestions.html", currsong="Empty song list", suggestions=suggestions, errors=nowerrors, success=nowsuccess)
         errors.append("Failed to connect to the database")
         return redirect("error")
     else:
         songs=get_songs()
         if songs:
             return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
+        if songs == {}:
+            errors.append("Empty suggestions list")
+            return render_template("adm_suggestions.html", currsong="Empty song list", suggestions=suggestions, errors=nowerrors, success=nowsuccess)
+          
         errors.append("Failed to connect to the database")
         return redirect("error")
 
@@ -1190,7 +1227,7 @@ if __name__ == "__main__":
     if sdict:
 	    d['currsong'] = min(sdict.keys())
     else:
-	    d['currsong'] = 0
+	    d['currsong'] = 1
         
     d['currsecs'] = 0
     d['songs'] = sdict

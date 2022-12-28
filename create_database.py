@@ -29,8 +29,8 @@ cur.execute("""CREATE TABLE suggestions (
         song_author TEXT NOT NULL,
         likes INTEGER DEFAULT 0)""")
 
-cur.execute("""INSERT INTO suggestions (uid, song_name,name_std, song_author)
-        VALUES ('2','Pulnocni','pulnocni', 'Karel Cech')""")
+# cur.execute("""INSERT INTO suggestions (uid, song_name,name_std, song_author)
+#         VALUES ('2','Pulnocni','pulnocni', 'Karel Cech')""")
 # cur.execute("""INSERT INTO suggestions (uid, song_name,name_std, song_author)
 #         VALUES ('1','Lighthouse keeper','ligthouse keeper', 'Sam Smith')""")
 # cur.execute("""INSERT INTO suggestions (uid, song_name, name_std,song_author)

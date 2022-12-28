@@ -15,8 +15,8 @@ I created a box with a TFT 1.8inch display, so for that additional libraries (`a
 
 
 ## Running and customising the database
-After installing all the libraries just `cd christmas_tree_lights2.0` and run `python3 application.py`. This will run it with pre-made database `chtrli.db`, which uses files from `songs_mp3`, `seq_txt` and `static/song_imgs` folders. Feel free to remove them, run `python3 create_database`. You should get a database with two users - **admin** (password is admin) and the same for **user**, one suggestion and empty song list.  
-**There is not _yet_ good error handling for empty song list, so after adding one song the server may crash, just restart it and it should be fine after that.**
+After installing all the libraries just `cd christmas_tree_lights2.0` and run `python3 application.py`. This will run it with pre-made database `chtrli.db`, which uses files from `songs_mp3`, `seq_txt` and `static/song_imgs` folders. Feel free to remove them, run `python3 create_database`. You should get a database with two users - **admin** (password is admin) and the same for **user**, empty song list and suggestion list.  
+**! If there are any problems after adding the first song and the server crashes, just restart it and it should be fine after that.**
 
 Also make sure to type the right audio channel to make the volume control work - running with sudo should be fine *"Headphone"*.
 
