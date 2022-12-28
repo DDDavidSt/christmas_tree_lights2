@@ -52,8 +52,7 @@ Session(app)
 @app.route('/playsong/<id>')
 def playsong(id):
     global d
-    print(id)
-    if (filter(lambda x: x[0] == id, d['songs'])):
+    if id in d['songs'].keys():
         d['currsec'] = 0
         d['currsong'] = int(id)
 
@@ -72,12 +71,11 @@ def edit():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
+
         succ_mess = ''
         if request.method == "POST":
-            print(currsong_index)
             if d['currsong']== int(request.form['id']):
                 errors.append("You cannot edit a song that is currently playing")
                 return redirect("adm_pl")
@@ -94,7 +92,6 @@ def edit():
 
                 else:
                     errors.append("Empty or not permitted song name")
-                    print(errors)
 
             if 'song_author' in request.form:
                 auth = check_name(request.form["song_author"])
@@ -139,7 +136,6 @@ def edit():
                     errors.append("File extension not permitted or wrong file name")
             
             if 'mp3_song' in request.files and request.files["mp3_song"].filename != '':
-                print("FOUND THE MP3 FILE")
                 mp3_file = request.files['mp3_song']
                 if mp3_file.filename[-4:] != '.mp3':
                     errors.append("Wrong mp3 file extension: only .mp3 allowed")
@@ -166,7 +162,6 @@ def edit():
                 
 
             if 'txt_sequence' in request.files and request.files["txt_sequence"].filename != '':
-                print("FOUND THE TXT FILE")
                 txt_file = request.files['txt_sequence']
                 if txt_file.filename[-4:] != '.txt':
                     errors.append("Wrong txt file extension: only .txt allowed")
@@ -196,9 +191,6 @@ def edit():
             conn.commit()
             if succ_mess != '':
                 success.append(succ_mess+'was edited')
-
-        print("ERRORS:",errors)
-        print("SUCCESS:", success)
         return redirect("adm_pl")
     else:
         songs=get_songs()
@@ -217,7 +209,6 @@ def add_new():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
 
@@ -229,8 +220,6 @@ def add_new():
             cur.execute("SELECT seq FROM sqlite_sequence WHERE name='songs';")
             next_id = str(list(cur.fetchone())[0] + 1)
 
-            print(values)
-            print("FILES:", request.files)
             if 'song_name_new' in request.form:
                 name = check_name(request.form["song_name_new"])
                 if len(name) != 0:
@@ -250,9 +239,7 @@ def add_new():
                 errors.append("Song author is a required input field!")
 
             if 'song_img_new' in request.files and request.files["song_img_new"].filename != '':
-                print("FOUND THE IMG FILE")
                 img_file = request.files['song_img_new']
-                print(img_file.filename[-4:])
                 if img_file.filename[-4:] != '.jpg' and img_file.filename[-4:] != '.png':
                     errors.append("Wrong img file extension: only .jpg or .png allowed")
                 if img_file and allowed_file(img_file.filename):
@@ -265,7 +252,6 @@ def add_new():
                 errors.append("Song image is a required input field")
 
             if 'mp3_song_new' in request.files and request.files["mp3_song_new"].filename != '':
-                print("FOUND THE MP3 FILE")
                 mp3_file = request.files['mp3_song_new']
                 if mp3_file.filename[-4:] != '.mp3':
                     errors.append("Wrong mp3 file extension: only .mp3 allowed")
@@ -279,7 +265,6 @@ def add_new():
                 errors.append("MP3 file is a required input field")
 
             if 'txt_sequence_new' in request.files and request.files["txt_sequence_new"].filename != '':
-                print("FOUND THE TXT FILE")
                 txt_file = request.files['txt_sequence_new']
                 if txt_file.filename[-4:] != '.txt':
                     errors.append("Wrong txt file extension: only .txt allowed")
@@ -330,9 +315,6 @@ def add_new():
                 errors.append("<code>"+str(e)+"</code>")
                 return redirect("adm_pl")
             succ_mess += f', txt sequence file <strong>{txt_filename}</strong> '
-            print("SAVING FILE:", next_id+'.mp3/txt')
-            print("SONG DURATION", song_duration)
-            
                 
             cur.execute("INSERT INTO songs (song_name, song_author, song_img_path, song_mp3_path, song_txt_path, song_duration_secs, song_duration_mins) VALUES (?,?,?,?,?,?,?)"
             ,(name, auth, 'song_imgs/'+next_id + '.jpg', mp3_path, txt_path, song_duration, sec_to_mins_sec(song_duration)))
@@ -351,18 +333,24 @@ def add_new():
                 sdict[i[0]] = i
             d['songs'] = sdict
 
-        print("ERRORS:",errors)
-        print("SUCCESS:", success)
         return redirect("adm_pl")
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
 
 
+@app.route('/volume')
+def volume():
+    m = alsaaudio.Mixer("Headphone")
+    return jsonify({'vol': m.getvolume()})
+
 @app.route('/set_vol', methods=['POST', 'GET'])
 def set_volume():
+    print("choooja")
     if session.get('id') is not None:
+        print("HOOOOOJAA")
         if request.method == "POST":
+            print("HEEEEJA")
             m = alsaaudio.Mixer("Headphone")
             m.setvolume(int(request.values.get("vol")))   
         return redirect(url_for("home"))
@@ -380,17 +368,14 @@ def make_admin():
             print("Failed to connect to the database")
             return jsonify(error=True), 400
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
-            print(session['id'], uid)    
             cur.execute("UPDATE users SET admin=1 WHERE id=?", (uid,))
             conn.commit()
             return jsonify(success=True)
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
+
             return jsonify(error=True), 400
     else:
         return jsonify(error=True), 400
@@ -405,17 +390,13 @@ def undo_admin():
             print("Failed to connect to the database")
             return jsonify(error=True), 400
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
-            print(session['id'], uid)    
             cur.execute("UPDATE users SET admin=0 WHERE id=?", (uid,))
             conn.commit()
             return jsonify(success=True)
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
             return jsonify(error=True), 400
     else:
         return jsonify(error=True), 400
@@ -431,18 +412,14 @@ def like_song():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
-            print(session['id'], sid)    
             cur.execute("INSERT INTO likes_songs (uid, song_id) VALUES (?, ?)", (session.get('id'), sid))
             cur.execute("UPDATE songs SET likes = likes + 1 WHERE id=?", (sid,))
             conn.commit()
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
-
+            pass
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
@@ -458,7 +435,6 @@ def unlike_song():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
@@ -467,8 +443,7 @@ def unlike_song():
 
             conn.commit()
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
+            pass
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
@@ -484,18 +459,14 @@ def like_sugg():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
-            print(session['id'], sid)    
             cur.execute("INSERT INTO likes_sugg (uid, sugg_id) VALUES (?, ?)", (session.get('id'), sid))
             cur.execute("UPDATE suggestions SET likes = likes + 1 WHERE id=?", (sid,))
             conn.commit()
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
-
+            pass
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
@@ -511,7 +482,6 @@ def unlike_sugg():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
@@ -519,18 +489,10 @@ def unlike_sugg():
             cur.execute("UPDATE suggestions SET likes = likes - 1 WHERE id=?", (sid,))
             conn.commit()
         except sqlite3.Error as e:
-            print("Not logged in user or problem writing into the database")
-            print(e)
+            pass
     else:
         songs=get_songs()
         return render_template("unauthorised.html", currson_index=d['currsong'], currsong=songs[d['songs'][d['currsong']][0]], songs=songs)
-
-@app.route('/volume')
-def volume():
-
-    m = alsaaudio.Mixer("Headphone")
-        
-    return jsonify({'vol': m.getvolume()})
 
 @app.route("/adm_usrs")
 def adm_usrs():
@@ -543,7 +505,6 @@ def adm_usrs():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         
@@ -554,7 +515,6 @@ def adm_usrs():
             col_names = [tup[0] for tup in res.description]
             row_val = [i for i in row]
             usrs.append(dict(zip(col_names,row_val)))
-        print(usrs)
         return render_template("adm_users.html", songs=songs, currsong=songs[d['songs'][d['currsong']][0]], usrs=usrs)
     else:
         songs=get_songs()
@@ -570,16 +530,12 @@ def del_song(id):
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         try:
             
             
             song = get_song(id)
-            print(id)
-            print(song)
-            print()
             cmd = f"mv songs_mp3/{song[0]['id']}.mp3 trash_mp3/"
             os.system(cmd)
             cmd = f"mv seq_txt/{song[0]['id']}.txt trash_txt/"
@@ -635,10 +591,8 @@ def admin_playlist():
 
         errors = []
         success = []
-        print(success, nowsuccess)
         songs = get_songs()
         if len(songs) != 0:
-            print(d)
             return render_template("adm_playlist.html", songs=songs, currsong_index=d['currsong'], currsong=d['songs'][d['currsong']], errors=nowerrors, success=nowsuccess, form_val=nowvalues)
         else:
             errors.append("Empty song list")
@@ -661,22 +615,18 @@ def login():
             errors.append("Failed to connect to the database")
             return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
 
         res = cur.execute("SELECT * FROM users WHERE uname=? AND pswd=?", (request.form.get('uname').strip(), request.form.get('pswd')))
         row = cur.fetchall()
         if row == []:
-
-            print("Wrong username or password")
             login_errors.append("Wrong username or password")
         else:
             col_names = [tup[0] for tup in res.description]
             row_val = [i for i in row[0]]
             usr = dict(zip(col_names,row_val))
 
-            print(usr)
             session["name"] = usr['uname']
             session['id'] = int(usr['id'])
             session['admin'] = int(usr['admin'])
@@ -717,7 +667,6 @@ def delete_sugg(id):
                 errors.append("Failed to connect to the database")
                 return redirect("error")
             else:
-                print("Database opened succesfully")
                 conn, cur = cur_ret
                 conn.row_factory = sqlite3.Row
             
@@ -747,11 +696,9 @@ def change_acc():
                 errors.append("Failed to connect to the database")
                 return redirect("error")
             else:
-                print("Database opened succesfully")
                 conn, cur = cur_ret
                 conn.row_factory = sqlite3.Row
 
-            print(request.form)
             name = check_name(request.form['usr_name'].strip())
             succ_mess = ''
             #checking if new name is already in the database
@@ -795,7 +742,6 @@ def change_acc():
                         errors.append("Problem when writing into database - user does not exist anymore or given username is not unique")
             else:
                 if len(errors) == 0:
-                    print(name, session['name'])
                     try:
                         cur.execute("UPDATE users SET uname=? WHERE uname=? ", (name, session['name']))
                         if cur.rowcount == 1:
@@ -823,7 +769,6 @@ def sign_up():
                 errors.append("Failed to connect to the database")
                 return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
 
@@ -838,7 +783,6 @@ def sign_up():
             signup_errors.append("Password must be at least 6 characters long")
             return redirect('/')
         
-        print(new_usr_name, new_usr_pswd)
         cur.execute("SELECT * FROM users WHERE uname=?", (new_usr_name,))
         row = cur.fetchall()
         if row == []:
@@ -846,7 +790,6 @@ def sign_up():
                 try:
                     cur.execute("INSERT INTO users (uname, pswd) VALUES (?,?)", (new_usr_name, new_usr_pswd))
                 except:
-                    print("ERROR SOME")
                     signup_errors.append("There was a problem writing into the database - check if the username and password are of the correct format")
                 conn.commit()
                 session["name"] = new_usr_name
@@ -857,7 +800,6 @@ def sign_up():
                 signup_errors.append("Provided passwords do not match")
         else:
             signup_errors.append("Username with such name already exists")
-            print("Username with such name already exists")
         return redirect('/')
 
 @app.route('/logout')
@@ -867,7 +809,7 @@ def logout():
         session["id"] = None
         session['admin'] = None
     except:
-        print("ERROR: Could not logout")
+        pass
     return redirect('/')
 
 @app.route("/")
@@ -877,8 +819,7 @@ def index():
     now_sgp_errors = signup_errors.copy()
     login_errors = []
     signup_errors = []
-    print(now_login_errors)
-    print(now_sgp_errors)
+
     now_log_err = login_errors.copy()
     login_errors = []
     if d['songs']:
@@ -960,7 +901,6 @@ def adm_delete_sugg(id):
                 errors.append("Failed to connect to the database")
                 return redirect("error")
         else:
-            print("Database opened succesfully")
             conn, cur = cur_ret
             conn.row_factory = sqlite3.Row
         
@@ -973,7 +913,6 @@ def adm_delete_sugg(id):
                 deleted.append(dict(zip(col_names,row_val)))
                 
             cur.execute("DELETE from suggestions WHERE id=?", (int(id),))
-            print('deleted:', deleted)
             conn.commit()
             for delitem in deleted:
                 success.append(f"Suggestion of a song <strong>{delitem['song_name']}</strong> by <strong>{delitem['song_author']}</strong> was deleted by <strong> ADMIN </strong>")
@@ -994,12 +933,10 @@ def add_suggestion():
         errors.append("Failed to connect to the database")
         return redirect("error")
     else:
-        print("Database opened succesfully")
         conn, cur = cur_ret
         conn.row_factory = sqlite3.Row
     
     name, author, succ_mess = '','',''
-    print(session) 
     uid = session.get('id')
     #if noone is logged in
     if uid is None:
@@ -1025,7 +962,6 @@ def add_suggestion():
                 #check if such a song isn't already in the database
                 name_std = rplc_spcl_char(name) #tries to crop the name as much as possible
 
-                print(uid, name, author, name_std, repr(name_std))
                 cur.execute("SELECT * FROM suggestions WHERE name_std=?", (name_std,))
                 rslt = cur.fetchall()
                 if rslt != []:
@@ -1039,7 +975,6 @@ def add_suggestion():
                 errors.append("There was a problem with writing into the database - check if the name and the author are not similar to some of the already listed suggestions")
                 errors.append('SQLite error:' + ' '.join(er.args))
 
-    print(errors, success)
     return redirect('suggestions')
 
 @app.route("/error")
@@ -1065,7 +1000,6 @@ def check_name(name):
     return re.sub(r'<[^>]*?>','', ' '.join(filter(lambda x: len(x) > 0, name.strip().split())))
 
 def opendb(db):
-    print(db, os.path.isfile(db))
     '''
         Returns None when a corrupted or not found database, otherwise return a list - connection and cursor respectively
     '''
@@ -1082,7 +1016,7 @@ def opendb(db):
 
 def get_song_duration(path):
     '''
-        Return None if path does not exist or problem with loading the file otherwise returns rounded duration in seconds
+        Returns None if path does not exist or problem with loading the file otherwise returns rounded duration in seconds
     '''
     try:
         audio = MP3(path)
@@ -1094,10 +1028,8 @@ def get_song_duration(path):
 def get_song(id):
     cur_ret = opendb(DATABASE_PATH)
     if cur_ret is None:
-        print("Failed to connect to the database")
         return None
     else:
-        print("Database opened succesfully")
         conn, cur = cur_ret
         conn.row_factory = sqlite3.Row
 
@@ -1122,12 +1054,10 @@ def get_songs():
         errors.append("Failed to connect to the database")
         return None
     else:
-        print("Database opened succesfully")
         conn, cur = cur_ret
         conn.row_factory = sqlite3.Row
     
     liked = [i[0] for i in cur.execute("SELECT song_id FROM likes_songs WHERE uid=?", (session.get('id', -1),)).fetchall()]
-    print("liked:", liked)
     res = cur.execute("SELECT * FROM songs")
     songs = {}
     for row in  cur.fetchall():
@@ -1158,10 +1088,8 @@ def get_suggestions(uid=None):
     cur_ret = opendb(DATABASE_PATH)
 
     if cur_ret is None:
-        print("Failed to connect to the database")
         return None
     else:
-        print("Database opened succesfully")
         conn, cur = cur_ret
         conn.row_factory = sqlite3.Row
 
@@ -1198,7 +1126,6 @@ def check_if_in_database(song_name, song_author, id=None):
         errors.append("Failed to connect to the database")
         return None
     else:
-        print("Database opened succesfully")
         conn, cur = cur_ret
         conn.row_factory = sqlite3.Row
     if id is None:
@@ -1248,7 +1175,6 @@ if __name__ == "__main__":
     cur_ret = opendb(DATABASE_PATH)
     sdict = {}
     if cur_ret is None:
-        print("Failed to connect to the database")
         errors.append("Failed to connect to the database")
         exit
     else:
@@ -1265,6 +1191,7 @@ if __name__ == "__main__":
 	    d['currsong'] = min(sdict.keys())
     else:
 	    d['currsong'] = 0
+        
     d['currsecs'] = 0
     d['songs'] = sdict
     print(d)

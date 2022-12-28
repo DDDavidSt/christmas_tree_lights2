@@ -8,12 +8,17 @@ Inspired by https://www.instructables.com/Raspberry-Pi-Christmas-Tree-Light-Show
 Also checkout this link https://drive.google.com/drive/folders/1Ku2mxV9_Gpv29n7ya_VAf92_tAC22TIS to make new sequences (some of the files are in this repo in case the drive folder would get deleted)
 
 ## Requirements
+If you're planning to run it automatically, save yourself some time and install them all running with `sudo` (took me a while to understand why alsamixer doesn't want to locate a certain channel)
+
 There are some particular libraries that you need to install (`pygame`, `werkzeug`, `mutagen`, `alsaaudio`).
-I created a box with a TFT 1.8inch display, so for that additional libraries (`adafruit-rgb-display`, `digitalio`, `board`) are required too (I might create a version without the display)
+I created a box with a TFT 1.8inch display, so for that additional libraries (`adafruit-circuitpython-rgb-display`, `digitalio`, `board`) are required too (I might create a version without the display)
+
 
 ## Running and customising the database
 After installing all the libraries just `cd christmas_tree_lights2.0` and run `python3 application.py`. This will run it with pre-made database `chtrli.db`, which uses files from `songs_mp3`, `seq_txt` and `static/song_imgs` folders. Feel free to remove them, run `python3 create_database`. You should get a database with two users - **admin** (password is admin) and the same for **user**, one suggestion and empty song list.  
 **There is not _yet_ good error handling for empty song list, so after adding one song the server may crash, just restart it and it should be fine after that.**
+
+Also make sure to type the right audio channel to make the volume control work - running with sudo should be fine *"Headphone"*.
 
 ### To-be-aware-of features
 - Volume cannot be controled by a user that is not signed in, also such users cannot like songs, or suggestions.
